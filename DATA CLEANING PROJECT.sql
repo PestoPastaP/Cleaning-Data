@@ -1,12 +1,11 @@
--- Cleaning data
-
-SELECT * FROM layoffs;
+-- Cleaning data in MySQL
 
 -- Remove Duplicates
--- Standardize the Data
--- Null Values or Blank values
--- Remove Any Columns or Rows
+-- Standardize the Data (Row 75)
+-- Null Values or Blank values (Row 100)
+-- Remove Any Columns or Rows (Row 135)
 
+SELECT * FROM layoffs;
 
 CREATE TABLE layoffs_staging
 LIKE layoffs;
@@ -17,7 +16,6 @@ FROM layoffs_staging;
 INSERT layoffs_staging
 SELECT *
 FROM layoffs;
-
 
 SELECT *,
 ROW_NUMBER() OVER(
@@ -41,8 +39,6 @@ SELECT *
 FROM layoffs_staging
 WHERE company = 'Casper';
 
-
-
 layoffs_staging2
 CREATE TABLE `layoffs_staging2` (
   `company` text,
@@ -57,8 +53,6 @@ CREATE TABLE `layoffs_staging2` (
   `row_num` INT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-
-
 SELECT * FROM world_layoffs.layoffs_staging2
 WHERE row_num > 1;
 
@@ -69,8 +63,6 @@ PARTITION BY company, location,
 industry, total_laid_off, percentage_laid_off, `date`, stage,
 country, funds_raised_millions) AS row_num
 FROM layoffs_staging;
-
-
 
 
 DELETE
@@ -88,18 +80,13 @@ FROM layoffs_staging2;
 UPDATE layoffs_staging2
 SET company = trim(company);
 
-
 UPDATE layoffs_staging2
 SET industry = 'Crypto'
 WHERE industry LIKE 'CrYpto%';
 
-
-
 UPDATE layoffs_staging2
 SET COUNTRY = TRIM(TRAILING '.' FROM country)
 WHERE industry LIKE 'United States%';
-
-
 
 SELECT `date`
 FROM layoffs_staging2;
@@ -107,22 +94,20 @@ FROM layoffs_staging2;
 UPDATE layoffs_staging2
 SET `date` = str_to_date(`date`,'%m/%d/%Y');
 
-
 ALTER TABLE layoffs_staging2
 MODIFY COLUMN `date` DATE;
+
+-- Null Values or Blank values
 
 SELECT *
 FROM layoffs_staging2
 WHERE total_laid_off IS NULL
 AND percentage_laid_off IS NULL;
 
-
-
 SELECT *
 FROM layoffs_staging2
 WHERE INDUSTRY IS NULL
 OR INDUSTRY = '';
-
 
 SELECT *
 FROM layoffs_staging2
@@ -140,13 +125,14 @@ UPDATE layoffs_staging2
 SET industry = NULL
 WHERE industry = '';
 
-
 UPDATE layoffs_staging2 t1
 JOIN layoffs_staging2 t2
 	ON t1.company = t2.company
 SET t1.industry = t2.industry
 WHERE t1.industry IS NULL
 AND t2.industry IS NOT NULL;
+
+-- Remove Any Columns or Rows
 
 ALTER TABLE layoffs_staging2
 DROP COLUMN row_num;
